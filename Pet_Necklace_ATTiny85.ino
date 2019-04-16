@@ -70,43 +70,42 @@ class AppManager : public TimedTask
 {
 	public:
 		AppManager( uint16_t _readRate,	Photocell *_ptrPhotocell);
-		//Task Scheduler-------------------------------------------------------------------------------			
+		//Task Scheduler---------------------------------------------------------------------------			
 		virtual void run(uint32_t now);
 	
 	private:
 		uint8_t readRate; 						// Rate to read the Tilt Sensor
 		
-		//Tilt Sensor Related--------------------------------------------------------------------------
+		//Tilt Sensor Related----------------------------------------------------------------------
 		void initPinChangeInterrupt();			// Enables the Pin Change Interrupt
 
-		//ADC Related----------------------------------------------------------------------------------
+		//ADC Related------------------------------------------------------------------------------
 		void enableADC(bool _enabled);			// Enable/Disable the ADC
 		bool isLightLevelOk();					// Compare Light Level reading to LIGHT_THRESHOLD
 		
-		//Pendant LED----------------------------------------------------------------------------------
+		//Pendant LED------------------------------------------------------------------------------
 		void togglePendantLED();				//Toggle the Pendant LED on each read of Tilt Sensor
 												//independent of the current Light Level.
 		
-		//Necklace LEDs--------------------------------------------------------------------------------
+		//Necklace LEDs----------------------------------------------------------------------------
 		void clearTimer1Config();
 		void updateTimer1Config(uint8_t _ledCycleCount);	// Timer1: Change/Update Timer1 Mode/Rate
-		void initSychronizedBlink_OCF1A();
 		void initAlternatingBlink_PWM();
 
-		//Global Control-------------------------------------------------------------------------------
+		//Global Control---------------------------------------------------------------------------
 		void enableGlobalInterrupts(bool _enabled);		// Enable/Disable Global Interrupts sei/cli
 		void enableNecklaceLEDOutput(bool _enabled);	// Enable/Disable Output for LEDs in Necklace
 		void enablePendantLEDOutput(bool _enabled);		// Enable/Disable Output for the Pendant LED
 		void goToSleep();								// Turn off peripherals and go to sleep...ZZzz
 		
-		//App Task Control Pointers-------------------------------------------------------------
+		//App Task Control Pointers----------------------------------------------------------------
 		Photocell *ptrPhotocell;
 
 };
 
-//-------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------
 // AppManager Constructor - Initializes the TimedTask to control the current application
-//-------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------
 AppManager::AppManager( uint16_t _readRate, Photocell *_ptrPhotocell)
 	
 	: TimedTask(millis()),
@@ -357,7 +356,7 @@ void AppManager::initAlternatingBlink_PWM()
 	//Alternating PWM pulses via Timer/Counter1
 	//-------------------------------------------------------------------------------------------
 		/****************************************************************************************
-		* TCCR1 – Timer/Counter1 Control Register Figure: 12.3.1, Pg: 89)
+		* TCCR1 ï¿½ Timer/Counter1 Control Register Figure: 12.3.1, Pg: 89)
 		*		CTC1 - Clear Timer/Counter1 on Compare Match (CTC Mode)
 		*		PWM1A - Pulse Width Modulator A Enable (PMW)
 		*		COM1A[1:0] - Controls output on OC1A/PB1
