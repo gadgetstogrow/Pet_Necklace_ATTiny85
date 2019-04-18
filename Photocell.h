@@ -208,5 +208,4 @@ uint8_t Photocell::getLightLevel()
 	
 }
 
-
 #endif /* PHOTOCELL_H_ */

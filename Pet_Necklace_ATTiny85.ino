@@ -376,6 +376,23 @@ void AppManager::updateTimer1Config(uint8_t _ledCycleCount)
 			//***********************************************************	
 			OCR1C = 199;		
 				
+	} else {	
+				
+			//***********************************************************
+			//	CYCLE_RATE_THRESHOLD_SLOW:
+			//
+			//	Frequency:	~2.5Hz
+			//
+			//	Equation:
+			//	488.28Hz / OCR1C=[199 + 1] = 2.44Hz
+			//-----------------------------------------------------------
+			//  Period:		~400ms
+			//
+			//  Equation: 
+			//	1 Clock Tick=[2.048ms] x OCR1C=[199 + 1] = 409.6ms
+			//***********************************************************	
+			OCR1C = 199;		
+				
 			//***********************************************************				
 			//	Duty Cycle:	~50%  <-- ON for 1/2 of period 
 			//
@@ -404,7 +421,8 @@ void AppManager::initAlternatingBlink_PWM()
 	//Alternating PWM pulses via Timer/Counter1
 	//-------------------------------------------------------------------------------------------
 		/****************************************************************************************
-		* TCCR1 – Timer/Counter1 Control Register Figure: 12.3.1, Pg: 89)
+		* TCCR1 ï¿½ Timer/Counter1 Control Register Figure: 12.3.1, Pg: 89)
+		*		CTC1 - Clear Timer/Counter1 on Compare Match (CTC Mode)
 		*		CTC1 - Clear Timer/Counter1 on Compare Match (CTC Mode)
 		*		PWM1A - Pulse Width Modulator A Enable (PMW)
 		*		COM1A[1:0] - Controls output on OC1A/PB1
@@ -441,7 +459,6 @@ void AppManager::initAlternatingBlink_PWM()
 				(1 << CS11)		|	//CS bit 1
 				(1 << CS10);		//CS bit 0
 		#endif
-
 
 }
 
