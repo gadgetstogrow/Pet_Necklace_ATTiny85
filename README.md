@@ -4,7 +4,7 @@ This project is useful for those looking to journey outside the cozy confines of
 
 ## 3D Printed Parts
 
-The 3D parts that make up the enclosure of this project were designed using FreeCAD. [FreeCAD](https://www.freecadweb.org/) all other materials needed are available online or at your local hardware store.
+The 3D parts that make up the enclosure of this project were designed using [FreeCAD](https://www.freecadweb.org/) all other materials needed are available online or at your local hardware store.
 
 
 ## Concepts discussed on Hackster.io 
