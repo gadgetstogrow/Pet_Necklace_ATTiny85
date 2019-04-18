@@ -71,16 +71,16 @@ volatile uint8_t ledCycleCount = 0;
 //
 //									Rate  Purpose
 //-------------------------------------------------------------------
-	#define APP_MANAGER_RATE_MS		100   // ~100 milliseconds readRate 
-	#define PHOTOCELL_READ_RATE_MS  1000  // ~1 second
+#define APP_MANAGER_RATE_MS		100   // ~100 milliseconds readRate 
+#define PHOTOCELL_READ_RATE_MS  1000  // ~1 second
 
 //-------------------------------------------------------------------
-// LED Cycles Rates/Thresholds (ledCycleRate)
+// LED Cycle Count/Thresholds (ledCycleRate)
 //-------------------------------------------------------------------
 #define CYCLE_RATE_THRESHOLD_FAST	60	//ledCycleCount 100-60
 #define CYCLE_RATE_THRESHOLD_MEDIUM	20	//ledCycleCount 59-20
 #define CYCLE_RATE_THRESHOLD_SLOW	0	//ledCycleCount 19-0
-	
+
 //-------------------------------------------------------------------
 // Cycle Count Definitions (ledCycleCount)
 //-------------------------------------------------------------------
@@ -95,8 +95,8 @@ volatile uint8_t ledCycleCount = 0;
 // light level has to be, to turn on the necklace LEDs. The Pendant LED
 // will remain unaffected until the ledCycleCount reaches zero.
 //-------------------------------------------------------------------
-//#define LIGHT_THRESHOLD				10 //DARK
-//#define LIGHT_THRESHOLD				50 //DUSK
-#define LIGHT_THRESHOLD				80 //CLOUDY DAY
+enum lightThresholds {DARK = 10, SUNDOWN = 40, TWILIGHT = 70};
+
+#define LIGHT_THRESHOLD	 SUNDOWN
 
 #endif /* CONFIG_H_ */
