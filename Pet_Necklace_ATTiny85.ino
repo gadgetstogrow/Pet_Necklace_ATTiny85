@@ -70,42 +70,42 @@ class AppManager : public TimedTask
 {
 	public:
 		AppManager( uint16_t _readRate,	Photocell *_ptrPhotocell);
-		//Task Scheduler---------------------------------------------------------------------------			
+		//Task Scheduler-------------------------------------------------------------------------------			
 		virtual void run(uint32_t now);
 	
 	private:
 		uint8_t readRate; 						// Rate to read the Tilt Sensor
 		
-		//Tilt Sensor Related----------------------------------------------------------------------
+		//Tilt Sensor Related--------------------------------------------------------------------------
 		void initPinChangeInterrupt();			// Enables the Pin Change Interrupt
 
-		//ADC Related------------------------------------------------------------------------------
+		//ADC Related----------------------------------------------------------------------------------
 		void enableADC(bool _enabled);			// Enable/Disable the ADC
 		bool isLightLevelOk();					// Compare Light Level reading to LIGHT_THRESHOLD
 		
-		//Pendant LED------------------------------------------------------------------------------
+		//Pendant LED----------------------------------------------------------------------------------
 		void togglePendantLED();				//Toggle the Pendant LED on each read of Tilt Sensor
 												//independent of the current Light Level.
 		
-		//Necklace LEDs----------------------------------------------------------------------------
+		//Necklace LEDs--------------------------------------------------------------------------------
 		void clearTimer1Config();
 		void updateTimer1Config(uint8_t _ledCycleCount);	// Timer1: Change/Update Timer1 Mode/Rate
 		void initAlternatingBlink_PWM();
 
-		//Global Control---------------------------------------------------------------------------
+		//Global Control-------------------------------------------------------------------------------
 		void enableGlobalInterrupts(bool _enabled);		// Enable/Disable Global Interrupts sei/cli
 		void enableNecklaceLEDOutput(bool _enabled);	// Enable/Disable Output for LEDs in Necklace
 		void enablePendantLEDOutput(bool _enabled);		// Enable/Disable Output for the Pendant LED
 		void goToSleep();								// Turn off peripherals and go to sleep...ZZzz
 		
-		//App Task Control Pointers----------------------------------------------------------------
+		//App Task Control Pointers-------------------------------------------------------------
 		Photocell *ptrPhotocell;
 
 };
 
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 // AppManager Constructor - Initializes the TimedTask to control the current application
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 AppManager::AppManager( uint16_t _readRate, Photocell *_ptrPhotocell)
 	
 	: TimedTask(millis()),
@@ -148,12 +148,13 @@ AppManager::AppManager( uint16_t _readRate, Photocell *_ptrPhotocell)
 }
 
 //-------------------------------------------------------------------
-// Main Routine
+// Main AppManager Routine
 //-------------------------------------------------------------------
 void AppManager::run(uint32_t now)
 {
 	if(ledCycleCount > 1) //Movement/Awake - performing application functions
 	{
+		//Decrement  the ledCycleCount, when it finally reaches zero, go to sleep
 		ledCycleCount--;
 
 			// Toggle the LED in the Pendant. This is good for debugging and battery
@@ -283,58 +284,105 @@ void AppManager::togglePendantLED()
 	PINB |= (1 << PB4);
 }
 
-//-------------------------------------------------------------------
-// Adjust Mode/Blink rate of Timer1 - proportional to movement. 
-// More activity = faster blink rate/more LEDs active.
-//-------------------------------------------------------------------
+//---------------------------------------------------------------------------
+// Adjust Frequency/Period and Duty Cycle of Timer1 - proportional to the
+// ledCycleCount: more activity = faster rate
+//---------------------------------------------------------------------------
 void AppManager::updateTimer1Config(uint8_t _ledCycleCount)
 {
-
 	
 	if (_ledCycleCount > CYCLE_RATE_THRESHOLD_FAST)
 	{			
-				//***********************************************************
-				//	CYCLE_RATE_THRESHOLD_FAST:
-				//
-				//	Frequency:	~10Hz
-				//	Period:		~100ms
-				//	Duty Cycle:	~50%
-				//
-				//
-				//***********************************************************
-				OCR1A = 25;
-				OCR1C = 50;
+			//***********************************************************
+			//***********************************************************
+			// Prescaler Clock is set to:
+			// Frequency 488.28Hz
+			//
+			// Equation: (Refer to initAlternatingBlink_PWM() method)
+			//
+			// 8000000/16824 = 488.28Hz <--- 8MHz System Clock
+			//		or
+			// 1000000/2048	= 488.28Hz	<--- 1MHz System Clock
+			// 
+			// (One Clock Tick = 2.048ms)
+			//
+			// 
+			//***********************************************************
+			//***********************************************************	
+			//***********************************************************
+			//	CYCLE_RATE_THRESHOLD_FAST:
+			//
+			//	Frequency:	~10Hz
+			//
+			//	Equation:
+			//	488.28 / OCR1C=[49 + 1] = 9.77Hz
+			//-----------------------------------------------------------
+			//  Period:		~100ms
+			//
+			//  Equation: 
+			//	1 Clock Tick=[2.048ms] x OCR1C=[49 + 1] = 102.4ms
+			//***********************************************************
+			OCR1C = 49;
+
+			//***********************************************************				
+			//	Duty Cycle:	~50%  <-- ON for 1/2 of period
+			//	
+			//	Equation:
+			//	OCR1A=[24 + 1] / OCR1C=[49 + 1] = .50
+			//***********************************************************
+			OCR1A = 24;	
 				
-			
 	} else if ((_ledCycleCount <= CYCLE_RATE_THRESHOLD_FAST) 
 				&& (_ledCycleCount > CYCLE_RATE_THRESHOLD_MEDIUM))
 	
-	{
-				//***********************************************************
-				//	CYCLE_RATE_THRESHOLD_MEDIUM:
-				//
-				//	Frequency:	~5Hz
-				//	Period:		~200ms
-				//	Duty Cycle:	~50%
-				//
-				//***********************************************************		
-				OCR1A = 50;
-				OCR1C =100;
-			
-	} else	
-	
-	{			
-				//***********************************************************
-				//	CYCLE_RATE_THRESHOLD_SLOW:
-				//
-				//	Frequency:	~2.50Hz
-				//	Period:		~400ms
-				//	Duty Cycle:	~50%
-				//
-				//***********************************************************		
-				OCR1A = 100;
-				OCR1C = 200;
+		{
+			//***********************************************************
+			//	CYCLE_RATE_THRESHOLD_MEDIUM:
+			//
+			//	Frequency:	~5Hz
+			//
+			//	Equation:
+			//	488.28Hz / OCR1C=[99 + 1] = 4.88Hz
+			//-----------------------------------------------------------
+			//  Period:		~200ms
+			//
+			//  Equation: 
+			//	1 Clock Tick=[2.048ms] x OCR1C=[99 + 1] = 204.8ms
+			//***********************************************************
+			OCR1C = 99;
+
+			//***********************************************************				
+			//	Duty Cycle:	~50%  <-- ON for 1/2 of period
+			//	
+			//	Equation:
+			//	OCR1A=[49 + 1] / OCR1C=[99 + 1] = .50
+			//***********************************************************	
+			OCR1A = 49;
 				
+	} else {	
+				
+			//***********************************************************
+			//	CYCLE_RATE_THRESHOLD_SLOW:
+			//
+			//	Frequency:	~2.5Hz
+			//
+			//	Equation:
+			//	488.28Hz / OCR1C=[199 + 1] = 2.44Hz
+			//-----------------------------------------------------------
+			//  Period:		~400ms
+			//
+			//  Equation: 
+			//	1 Clock Tick=[2.048ms] x OCR1C=[199 + 1] = 409.6ms
+			//***********************************************************	
+			OCR1C = 199;		
+				
+			//***********************************************************				
+			//	Duty Cycle:	~50%  <-- ON for 1/2 of period 
+			//
+			//	Equation:
+			//  OCR1A=[99 + 1] / OCRIC=[199 + 1] = .50
+			//***********************************************************	
+			OCR1A = 99;
 	}
 
 }
@@ -356,7 +404,7 @@ void AppManager::initAlternatingBlink_PWM()
 	//Alternating PWM pulses via Timer/Counter1
 	//-------------------------------------------------------------------------------------------
 		/****************************************************************************************
-		* TCCR1 ï¿½ Timer/Counter1 Control Register Figure: 12.3.1, Pg: 89)
+		* TCCR1 – Timer/Counter1 Control Register Figure: 12.3.1, Pg: 89)
 		*		CTC1 - Clear Timer/Counter1 on Compare Match (CTC Mode)
 		*		PWM1A - Pulse Width Modulator A Enable (PMW)
 		*		COM1A[1:0] - Controls output on OC1A/PB1
@@ -370,8 +418,8 @@ void AppManager::initAlternatingBlink_PWM()
 		* |   1   |   0   | <-- Clear OC1A/PB1 output line
 		* |   1   |   1   | <-- Set OC1A/PB1 output line
 		*
-		* Note: Clock Select CS[12-10] is global to Timer/Counter1 and effects both OC1A/PB1 
-		* and OC1B/PB4. 
+		* Note: Clock Select CS[12-10] is global to Timer/Counter1 and affects both OC1A/PB1 
+		* and OC1B/PB4. We set the Prescale clock to 488.28ms
 		* 
 		*
 		* |CTC1 |PWM1A|COM1A1 |COM1A0 |CS13 |CS12 |CS11 |CS10|
@@ -382,7 +430,7 @@ void AppManager::initAlternatingBlink_PWM()
 				(1 << PWM1A)	|	//PWM 
 				(0 << COM1A1)	|	//OC1A/PB1 
 				(1 << COM1A0)	|	//OC1A/PB1 
-		#if F_CPU == 1000000UL		// <-----------Divide System Clock by 2048
+		#if F_CPU == 1000000UL		// <-----------Divide System Clock by 2048 
 				(1 << CS13)		|	//CS bit 3
 				(1 << CS12)		|	//CS bit 2
 				(0 << CS11)		|	//CS bit 1
@@ -551,13 +599,6 @@ void AppManager::goToSleep()
 		// *** Turn On the Analog To Digital Converter (ADC) for Photocell readings
 		// *** 
 		enableADC(true);
-		
-		// ***
-		// *** Reset OCR1A/OCR1C to "fast" values for initial blink rate
-		// *** (otherwise, the Necklace LEDs seem to "pause" before blinking)
-		// ***
-		OCR1A = 25;
-		OCR1C = 50;
 
 		//Re-enable Output LEDs
 		enablePendantLEDOutput(true);

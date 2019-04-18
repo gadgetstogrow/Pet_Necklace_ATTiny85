@@ -203,7 +203,9 @@ void Photocell::run(uint32_t now)
 //-------------------------------------------------------------------
 uint8_t Photocell::getLightLevel()
 {
+	
 	return lightLevel;
+	
 }
 
 
