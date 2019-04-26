@@ -460,7 +460,7 @@ void AppManager::initPinChangeInterrupt()
 	* |  -  |  -  |DDB5 |DDB4 |DDB3 |DDB2 |DDB1 |DDB0 |
 	* | N/A | N/A |  0  |  0  |  0  |  0  |  0  |  0  |
 	****************************************************************************************/
-	DDRB  &= ~(0 << TILT_SENSOR_PIN);	//Set TILT_SENSOR_PIN(PB3) to Input -DDB3/PB3 = 0
+	DDRB  &= ~(1 << TILT_SENSOR_PIN);	//Set TILT_SENSOR_PIN(PB3) to Input -DDB3/PB3 = 0
 	
 	/****************************************************************************************
 	* Set up Tilt Sensor Input as a Pullup Pin - Replaces: "digitalWrite(PB3, HIGH)"
