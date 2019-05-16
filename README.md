@@ -1,3 +1,5 @@
+# USE THE RECONFIGURATION CODE - KG 5-16-19 (WILL MERGE BEFORE PUBLISHING)
+
 # LED Pet Necklace with the ATTiny85
 
 This project is useful for those looking to journey outside the cozy confines of the Arduino Uno and on to other AVRs. The ATTiny85 is a great place to start. The example code was first developed using Atmel Studio 7 with the help of an AVR Dragon for debugging. Don't worry, It will compile and upload using the Arduino IDE. A complete and detailed tutorial can be found on my project page on [Hackster.io] (https://www.hackster.io/GadgetsToGrow/)
